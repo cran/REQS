@@ -5,14 +5,14 @@
 \description{This function calls an EQS script file (.eqs) and executes it. 
 }
 \usage{
-call.eqs(EQSpgm, EQSmodel, serial, data = NA, datname = NA, LEN = 2000000)
+call.eqs(EQSpgm, EQSmodel, serial, Rmatrix = NA, datname = NA, LEN = 2000000)
 
 }
 \arguments{
   \item{EQSpgm}{String containing path including program name where EQS is located (see details)}
   \item{EQSmodel}{String containing path where .eqs script file is located (see details)}
   \item{serial}{EQS serial number as integer value}
-  \item{data}{Optional matrix argument if data or covariances are stored in R}
+  \item{Rmatrix}{Optional matrix argument if data or covariances are stored in R}
   \item{datname}{If \code{data} is specified, a filename (string) must be provided for saving the data in text format (blank separated; see details)}
   \item{LEN}{Integer containing number of working array units. By default, it is 2000000 8 bytes units}
 }

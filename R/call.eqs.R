@@ -1,4 +1,4 @@
-call.eqs <- function(EQSpgm, EQSmodel, serial, data = NA, datname = NA, LEN = 2000000)
+call.eqs <- function(EQSpgm, EQSmodel, serial, Rmatrix = NA, datname = NA, LEN = 2000000)
 {
   #EQSpgm ... EQS directory
   #EQSmodel ... path, where eqs-file is located
@@ -9,7 +9,7 @@ call.eqs <- function(EQSpgm, EQSmodel, serial, data = NA, datname = NA, LEN = 20
   filedir.split <- strsplit(EQSmodel, "/")[[1]]
   n <- length(filedir.split) 
   filedir <- paste(filedir.split[1:(n-1)], collapse = "/")
-  setwd(filedir)
+  if (n > 1) setwd(filedir)
   
   #--------- string specifications -----------
   outname <- strsplit(filedir.split[n], "\\.")[[1]][1]
@@ -21,12 +21,12 @@ call.eqs <- function(EQSpgm, EQSmodel, serial, data = NA, datname = NA, LEN = 20
   serstring <- paste("SER=", serial, "\n", sep = "")
   
   #----------- sanity check for input data ----------------
-  if(length(data) > 1) {                              #write data matrix, to file.dat, blank separated
+  if(length(Rmatrix) > 1) {                              #write data matrix, to file.dat, blank separated
     if(is.na(datname)) {
       warning(paste("No filename for data specified! ",outname,".dat is used", sep = "")) 
       datname <- paste(outname,".dat", sep = "")
     }
-    write.table(as.matrix(data), file = datname, col.names = FALSE, row.names = FALSE)
+    write.table(as.matrix(Rmatrix), file = datname, col.names = FALSE, row.names = FALSE)
   }   
   
   
@@ -35,7 +35,7 @@ call.eqs <- function(EQSpgm, EQSmodel, serial, data = NA, datname = NA, LEN = 20
 
   EQScmd <- paste(EQSpgm, filepathin, fileout, lenstring, serial)
   
-  RetCode <- system(EQScmd,intern = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL,
+  RetCode <- system(EQScmd, intern = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL,
       show.output.on.console = FALSE, minimized = FALSE, invisible = FALSE)
   
   return(RetCode)

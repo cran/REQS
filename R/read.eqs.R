@@ -156,12 +156,21 @@ read.eqs <- function(file)
       comb.names <- as.matrix(expand.grid(rownames(parmat[[i]]), colnames(parmat[[i]])))
       par.val0 <- as.vector(parmat[[i]])  
     }
-    par.val.ind <- which(((par.val0 != 0)+(par.val0 != -1)) == 2)
+    par.val.ind <- which(((par.val0 != 0)+(par.val0 != -1)) == 2)     #see FIXME!!!
     names.mat <- rbind(comb.names[par.val.ind,])
     names <- apply(names.mat, 1, function(ss) paste("(",ss[1],",",ss[2],")", sep = ""))
     namesvec <- c(namesvec, names)
   }
-  rownames(parse.mat) <- namesvec
+  
+  #FIXME!!! rownames need to be fixed better
+  #if parameter values are 0, namevec doesn't identify them as parameters
+  if ((dim(parse.mat)[1]) != (length(namesvec)))  {
+    parse.mat <- parse.mat[parse.mat[,1] != 0,]
+    if ((dim(parse.mat)[1]) == (length(namesvec))) rownames(parse.mat) <- namesvec 
+  } else {
+    rownames(parse.mat) <- namesvec
+  }
+  #end FIXME!!!
 
   #------------------- end se, rse, cse, gradient --------------------------
 
