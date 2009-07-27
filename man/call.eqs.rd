@@ -11,7 +11,7 @@ call.eqs(EQSpgm, EQSmodel, serial, Rmatrix = NA, datname = NA, LEN = 2000000)
 \arguments{
   \item{EQSpgm}{String containing path including program name where EQS is located (see details)}
   \item{EQSmodel}{String containing path where .eqs script file is located (see details)}
-  \item{serial}{EQS serial number as integer value}
+  \item{serial}{EQS serial number as character}
   \item{Rmatrix}{Optional matrix argument if data or covariances are stored in R}
   \item{datname}{If \code{data} is specified, a filename (string) must be provided for saving the data in text format (blank separated; see details)}
   \item{LEN}{Integer containing number of working array units. By default, it is 2000000 8 bytes units}
@@ -40,7 +40,7 @@ Returns an integer whether estimation was succesfully (value of 0) or not (value
 \examples{
 
 ##not executable, valid serial number has to be provided
-##res <- call.eqs(EQSpgm = '"C:/Program Files/EQS61/WINEQS"', EQSmodel = "c:/eqs61/examples/manul7.eqs", serial = 1234)
+##res <- call.eqs(EQSpgm = "C:/Program Files/EQS61/WINEQS.EXE", EQSmodel = "c:/eqs61/examples/manul7.eqs", serial = "1234")
 
 
 }
