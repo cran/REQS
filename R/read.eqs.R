@@ -98,7 +98,7 @@ read.eqs <- function(file)
       endline <- (endlinevec[endlinevec > 0])[1]                  #ending lines
       nlines <- endline-startline                                  #number of lines
     } else {                                                      #last element
-      nlines <- 0
+      if ((cbk.info.mat[i,2]) > 0) nlines <- 1 else nlines <- 0
     }
   
     if (startline != 0) {
@@ -189,7 +189,7 @@ read.eqs <- function(file)
   for (i in 6:10) {
     if (length(model.list[[i]]) > 1) {
       cov.list[[i-5]] <- matrix(model.list[[i]], nrow = sqrt(length(model.list[[i]])))
-      if (i <= 7) dimnames(cov.list[[i-5]]) <- list(depnames, depnames)
+      if (i <= 7) dimnames(cov.list[[i-5]]) <- list(depnames[1:dim(cov.list[[i-5]])[1]], depnames[1:dim(cov.list[[i-5]])[2]])
       if (i >= 8) dimnames(cov.list[[i-5]]) <- list(namesvec, namesvec)
       }
   }
