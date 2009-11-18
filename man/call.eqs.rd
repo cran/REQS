@@ -28,7 +28,7 @@ The argument \code{datname} must match with the input data specified in the corr
 }
 
 \value{
-Returns an integer whether estimation was succesfully (value of 0) or not (value of 1). 
+Returns \code{TRUE} is the estimation was succesfully and \code{FALSE} otherwise. 
 }
 
 \references{Bentler, P. M. (1995). EQS Program Manual. Encino, CA: Multivariate Software Inc.}

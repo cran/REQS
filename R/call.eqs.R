@@ -41,8 +41,13 @@ call.eqs <- function(EQSpgm, EQSmodel, serial, Rmatrix = NA, datname = NA, LEN =
   #    show.output.on.console = FALSE, minimized = FALSE, invisible = FALSE)
       
   RetCode <- system(EQScmd, intern = FALSE, ignore.stderr = TRUE, wait = TRUE, input = NULL)
+  if (RetCode == 0) {
+    success <- TRUE
+  } else {
+    success <- FALSE 
+  }
   
-  return(RetCode)
+  return(success = success)
 }
 
 

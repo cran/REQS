@@ -33,7 +33,7 @@ The value list below provides objects for the full EQS output. If in EQS some ob
 }
 
 \value{Returns a list with the following objects:
-
+  \item{success}{\code{TRUE} if estimation was successful, \code{FALSE} otherwise}
   \item{model.info}{General model information}
   \item{pval}{p-values for various test statistics}
   \item{fit.indices}{Variuos fit indices}
