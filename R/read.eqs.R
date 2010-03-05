@@ -18,14 +18,16 @@ read.eqs <- function(file)
 
   cbk.info1 <- scan(file.cbk, skip = 2, nlines = 2, quiet = TRUE)   #read metainfo from cbk lines (first 4 lines)
   cbk.info2 <- scan(file.cbk, skip = 4, nlines = 2, quiet = TRUE)
+  endfile <- scan(file.cbk, nlines = 1, quiet = TRUE)               #Carl's suggestion
+  
   cbk.info.mat <- cbind(cbk.info2, cbk.info1)         #matrix of meta informations
   rownames(cbk.info.mat) <- c("Parameter estimates", "Standard errors", "Robust standard errors",
   "Corrected standard errors", "Gradients", "Sample covariance matrix", "Model Covariance Matrix (Sigma hat)",
   "Inverted Information matrix", "Robust inverted information matrix", "Corrected inverted information matrix",
   "First derivatives", "4th Moment weight matrix", "Standardized Elements", "R-squares", "Factor means",
   "Univariate statistics (means)", "Univariate statistics (standard deviations)", "Univariate statistics (skewness)",
-  "Univariate statistics (kurtosis)", "Univariate statistics (sample size)", "Independent variable standardization vector",
-  "Dependent variable standardization vector")
+  "Univariate statistics (kurtosis)", "Univariate statistics (sample size)", "Dependent variable standardization vector",
+  "Independent variable standardization vector")
   colnames(cbk.info.mat) <- c("Line Number","Number of Elements")
   
   #contains the basic information only
@@ -68,6 +70,7 @@ read.eqs <- function(file)
   #-------------- parameter index matrices ----------
   n.ind <- desc.dframe[8,1]          #number of independent variables
   n.dep <- desc.dframe[9,1]          #number of dependent variables
+  n.fac <- desc.dframe[3,1]          #number of factors
   n.tot <- n.ind + n.dep
   if (n.ind%%32 == 0) {              #number of header lines to be skipped in .ETP
     skiplines <- n.ind/32            #21 elements per line (then new line)
@@ -98,7 +101,8 @@ read.eqs <- function(file)
       endline <- (endlinevec[endlinevec > 0])[1]                  #ending lines
       nlines <- endline-startline                                  #number of lines
     } else {                                                      #last element
-      if ((cbk.info.mat[i,2]) > 0) nlines <- 1 else nlines <- 0
+      #if ((cbk.info.mat[i,2]) > 0) nlines <- 1 else nlines <- 0
+      if ((cbk.info.mat[i,2]) > 0) nlines <- endfile-startline else nlines <- 0    #Carl's suggestion
     }
   
     if (startline != 0) {
@@ -176,20 +180,31 @@ read.eqs <- function(file)
 
   #----------------- covariance and information matrices -------------------
   meanjn <-  scan(file.cbk, skip = 1, nlines = 1, quiet = TRUE)[3]          #whether mean was computed or not
-  depnames <- rownames(parmat$Beta)
-  if (meanjn == 0) {                            
-    p <- n.dep                                   #p is needed for derivatives
-  } else {
-    p <- n.dep + 1
-    depnames <- c(depnames, "mean")          #needed for sigma hat dimnames  
-  }
+  
+  Vcheckstr <- colnames(parmat$Phi)                                         #in case of V's in Phi
+  compstr <- paste("V", 1:999, sep = "")
+  TFVcheck <- Vcheckstr %in% compstr
+  if (any(TFVcheck)) depnames.add <- Vcheckstr[TFVcheck] else depnames.add <- NULL 
+  
+  VBcheckstr <- colnames(parmat$Beta)
+  TFVBcheck <- VBcheckstr %in% compstr
+  if (any(TFVcheck)) depnames.addB <- VBcheckstr[TFVBcheck] else depnames.addB <- NULL 
+  
+  depnames <- c(depnames.addB, depnames.add)
+  rm(compstr) 
+  
+  if (meanjn == 0)  p <- n.dep else  p <- n.dep + 1                         #p is needed for derivatives
 
   cov.list <- as.list(rep(NA, 5))
   names(cov.list) <- c("sample.cov","sigma.hat","inv.infmat","rinv.infmat","cinv.infmat") 
   for (i in 6:10) {
     if (length(model.list[[i]]) > 1) {
       cov.list[[i-5]] <- matrix(model.list[[i]], nrow = sqrt(length(model.list[[i]])))
-      if (i <= 7) dimnames(cov.list[[i-5]]) <- list(depnames[1:dim(cov.list[[i-5]])[1]], depnames[1:dim(cov.list[[i-5]])[2]])
+      if (i <= 7) {                                                     #cov matrices
+        dimnames(cov.list[[i-5]]) <- list(depnames[1:dim(cov.list[[i-5]])[1]], depnames[1:dim(cov.list[[i-5]])[2]])
+        order.V <- order(depnames)                                      #sort matrix according to V's 
+        cov.list[[i-5]] <- cov.list[[i-5]][order.V, order.V]
+      }
       if (i >= 8) dimnames(cov.list[[i-5]]) <- list(namesvec, namesvec)
       }
   }
@@ -221,7 +236,7 @@ read.eqs <- function(file)
   result <- c(list(model.info = minfo.dframe), list(pval = probs.dframe), list(fit.indices = fit.dframe), list(model.desc = desc.dframe),
               parmat, list(par.table = parse.mat), cov.list, list(derivatives = deriv1), list(moment4 = moment4),
               list(ssolution = model.list[[13]]), list(Rsquared = model.list[[14]]), list(fac.means = model.list[[15]]),
-              list(var.desc = ustatmat), list(indstd = model.list[[21]]), list(depstd = model.list[[22]]))
+              list(var.desc = ustatmat), list(depstd = model.list[[21]]), list(indstd = model.list[[22]]))
 
   
   result
