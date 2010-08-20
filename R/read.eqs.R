@@ -188,7 +188,7 @@ read.eqs <- function(file)
   
   VBcheckstr <- colnames(parmat$Beta)
   TFVBcheck <- VBcheckstr %in% compstr
-  if (any(TFVcheck)) depnames.addB <- VBcheckstr[TFVBcheck] else depnames.addB <- NULL 
+  if (any(TFVBcheck)) depnames.addB <- VBcheckstr[TFVBcheck] else depnames.addB <- NULL 
   
   depnames <- c(depnames.addB, depnames.add)
   rm(compstr) 
