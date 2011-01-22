@@ -17,7 +17,8 @@ read.eqs <- function(file)
   file.etp <- paste(file.split[[1]][1], ".ETP",sep = "" )
 
   cbk.info1 <- scan(file.cbk, skip = 2, nlines = 2, quiet = TRUE)   #read metainfo from cbk lines (first 4 lines)
-  cbk.info2 <- scan(file.cbk, skip = 4, nlines = 2, quiet = TRUE)
+  cbk.info2 <- scan(file.cbk, skip = 4, nlines = 2, quiet = TRUE) + 1
+  cbk.info2[which(cbk.info2 == 1)] <- 0
   endfile <- scan(file.cbk, nlines = 1, quiet = TRUE)               #Carl's suggestion
   
   cbk.info.mat <- cbind(cbk.info2, cbk.info1)         #matrix of meta informations
@@ -31,7 +32,9 @@ read.eqs <- function(file)
   colnames(cbk.info.mat) <- c("Line Number","Number of Elements")
   
   #contains the basic information only
-  cbk.base <- read.fwf(file.cbk, widths = c(13, 3), skip = 6, col.names = c("variable", "line"), buffersize = 1, n = 98)        #data frame 
+  #cbk.base <- read.fwf(file.cbk, widths = c(13, 3), skip = 6, col.names = c("variable", "line"), buffersize = 1, n = 98)        #data frame 
+  cbk.base <- read.fwf(file.cbk, widths = c(13, 3), skip = 6, col.names = c("variable", "line"), buffersize = 1, n = 103)        #data frame 
+
 
   #--------------- model info  ----------------------
   nminfo <- length(which(cbk.base[,2] == 2))                              #how many lines with model infos
@@ -52,8 +55,8 @@ read.eqs <- function(file)
 
   #---------------- fit indices/tests ---------------
   start.cbk <- start.cbk + ntprobs
-  nfit <- 60
-  fit.val <- scan(file.ets, skip = 4, nlines = 6, quiet = TRUE)
+  nfit <- 62
+  fit.val <- scan(file.ets, skip = 4, nlines = 7, quiet = TRUE)
   fit.val[which(fit.val == -9)] <- NA
   fit.dframe <- data.frame(fit.val, row.names = cbk.base[start.cbk:(start.cbk+nfit-1),1])
   colnames(fit.dframe) <- "fit values"
@@ -62,7 +65,7 @@ read.eqs <- function(file)
   #----------------- descriptives -------------------
   start.cbk <- start.cbk + nfit
   ndesc <- 9
-  desc.val <- scan(file.ets, skip = 11-1, nlines = 1, quiet = TRUE)    
+  desc.val <- scan(file.ets, skip = 11, nlines = 1, quiet = TRUE)    
   desc.dframe <- data.frame(desc.val, row.names = cbk.base[start.cbk:(start.cbk+ndesc-1),1])
   colnames(desc.dframe) <- "values"
   #---------------- end descriptives ----------------
@@ -73,9 +76,9 @@ read.eqs <- function(file)
   n.fac <- desc.dframe[3,1]          #number of factors
   n.tot <- n.ind + n.dep
   if (n.ind%%32 == 0) {              #number of header lines to be skipped in .ETP
-    skiplines <- n.ind/32            #21 elements per line (then new line)
+    skiplines <- n.ind/32+1          #21 elements per line (then new line)
   } else {
-    skiplines <- trunc(n.ind/32)+1
+    skiplines <- trunc(n.ind/32)+1+1
   }
 
   if (n.dep%%32 == 0) {              #number of header lines to be skipped in .ETP
@@ -84,14 +87,13 @@ read.eqs <- function(file)
     skiplines <- skiplines + trunc(n.dep/32)+1
   }
   
-  parindvec <- scan(file.etp, skip = skiplines, quiet = TRUE)       #index vector from etp file
-  varnames.string <- readLines(file.etp, n = skiplines)             #read variable names
+  varnames.string <- readLines(file.etp, n = skiplines-1)             #read variable names
   varnames.chvec <- unlist(strsplit(varnames.string, split =" "))
   varnames.vec <- varnames.chvec[which(varnames.chvec != "")]
   #------------ end parameter index matrices --------
 
   #-------------- read parameters and friends into list -----------
-  nout <- dim(cbk.info.mat)[1]                                    #total number of outputs (22)
+  nout <- nrow(cbk.info.mat)                                    #total number of outputs (22)
   model.list <- as.list(rep(NA, nout))                            #initialize list
   
   for (i in 1:nout) {
@@ -106,7 +108,18 @@ read.eqs <- function(file)
     }
   
     if (startline != 0) {
-      vals <- scan(file.ets, skip = startline-1, nlines = nlines, quiet = TRUE)
+      vals <- scan(file.ets, what = "character", skip = startline-1, nlines = nlines, quiet = TRUE)
+      Eind.minus <- grep("[0-9]-[0-9]", vals)
+      valsnew.minus <- gsub("^E", "",gsub("-","E-", vals[Eind.minus]))
+      #valsnew.minus <- gsub("?!^-","E-", vals[Eind.minus])
+      Eind.plus <- grep("[0-9]\\+[0-9]", vals)
+      valsnew.plus <- gsub("^E", "",gsub("\\+","E\\+", vals[Eind.plus]))
+      vals[Eind.minus] <- valsnew.minus 
+      vals[Eind.plus] <- valsnew.plus
+      vals <- as.numeric(vals) 
+      
+      #vals <- scan(file.ets, what = "character", skip = startline-1, nlines = nlines, quiet = TRUE)
+      #vals <- scan(file.ets, what = list("numeric", "character"), skip = startline-1, nlines = nlines, quiet = TRUE)
     } else {                                                      #no output provided
       vals <- NA
     }
@@ -116,6 +129,7 @@ read.eqs <- function(file)
   
   #-------------------- reorganize values into phi, gamma, beta ------------------
   par.val <- model.list[[1]]                                      #vector with parameter values
+  parindvec <- scan(file.etp, skip = skiplines-1, quiet = TRUE)       #index vector from etp file    CHECK!!!
   
   par.pos <- which(parindvec > 0)                                 #cumulating parameter indices
   phi.dim <- n.ind*n.ind
@@ -148,9 +162,9 @@ read.eqs <- function(file)
   parse.mat <- NULL
   for (i in 1:5) parse.mat <- cbind(parse.mat, model.list[[i]])
   colnames(parse.mat) <- c("Parameter", "SE", "RSE", "CSE", "Gradient")
-  npar <- dim(parse.mat)[1]
+  npar <- nrow(parse.mat)
 
-  namesvec <- NULL
+  namesvec <- NULL                                                                 #just to get the names vector
   for (i in 1:3) {
     if (i == 1) {                                                                  #Phi is symmetric
       combmat <- combinations(dim(parmat[[i]])[1], 2, repeats.allowed = TRUE)      #index matrix for name combinations
@@ -214,7 +228,10 @@ read.eqs <- function(file)
 
   pstar <- p*(p+1)/2
   if (length(model.list[[11]]) > 1) {
-    deriv1 <- matrix(model.list[[11]], nrow = npar, ncol = pstar)
+    deriv1 <- model.list[[11]]
+    #FIXME!! Matrix dimension (ex. manul1xfull.ets)
+    #deriv1 <- matrix(model.list[[11]], nrow = npar, ncol = pstar)
+    #rownames(deriv1) <- rownames(parse.mat)
   } else {
     deriv1 <- NA
   }
@@ -222,7 +239,9 @@ read.eqs <- function(file)
 
   #----------------------------- 4th moments -------------------------------
   if (length(model.list[[12]]) > 1) {
-    moment4 <- matrix(model.list[[12]], nrow = pstar, ncol = pstar)
+    moment4 <- model.list[[12]]
+    #FIXME!! Matrix dimension (ex. manul1xfull.ets)
+    #moment4 <- matrix(model.list[[12]], nrow = pstar, ncol = pstar)
   } else {
     moment4 <- NA
   }

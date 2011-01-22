@@ -44,7 +44,8 @@ call.eqs <- function(EQSpgm, EQSmodel, serial, Rmatrix = NA, datname = NA, LEN =
   if (RetCode == 0) {
     success <- TRUE
   } else {
-    success <- FALSE 
+    success <- FALSE
+    warning("EQS estimation was not successful!") 
   }
   
   return(success = success)
