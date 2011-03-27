@@ -129,7 +129,7 @@ read.eqs <- function(file)
   
   #-------------------- reorganize values into phi, gamma, beta ------------------
   par.val <- model.list[[1]]                                      #vector with parameter values
-  parindvec <- scan(file.etp, skip = skiplines-1, quiet = TRUE)       #index vector from etp file    CHECK!!!
+  parindvec <- scan(file.etp, skip = skiplines-1, quiet = TRUE)       #index vector from etp file    
   
   par.pos <- which(parindvec > 0)                                 #cumulating parameter indices
   phi.dim <- n.ind*n.ind
@@ -169,27 +169,37 @@ read.eqs <- function(file)
     if (i == 1) {                                                                  #Phi is symmetric
       combmat <- combinations(dim(parmat[[i]])[1], 2, repeats.allowed = TRUE)      #index matrix for name combinations
       comb.names <- apply(combmat, 2, function(rn) rownames(parmat[[i]])[rn])      #matrix with name combinations
+      
+      ## to be tested
+      comb.names[,2:1] <- comb.names
+      
+      ## to be tested!!
+      if (sum(diag(parmat[[i]]) == 0) > 0) {                                       #parameter with value 0 to be included
+       diag(parmat[[i]])[which(diag(parmat[[i]]) == 0)] <- -99                     #set dummy
+      }
+      
       par.val0 <- parmat[[i]][lower.tri(parmat[[i]], diag = TRUE)]                 #parameter vector with 0's
     } else {                                                                       #gamma not symmetric
       comb.names <- as.matrix(expand.grid(rownames(parmat[[i]]), colnames(parmat[[i]])))
+      
+      ## to be tested!!
+      if (i ==3) comb.names[,2:1] <- comb.names
+      
       par.val0 <- as.vector(parmat[[i]])  
     }
-    par.val.ind <- which(((par.val0 != 0)+(par.val0 != -1)) == 2)     #see FIXME!!!
+    par.val.ind <- which(((par.val0 != 0)+(par.val0 != -1)) == 2)     
     names.mat <- rbind(comb.names[par.val.ind,])
     names <- apply(names.mat, 1, function(ss) paste("(",ss[1],",",ss[2],")", sep = ""))
     namesvec <- c(namesvec, names)
   }
   
-  #FIXME!!! rownames need to be fixed better
-  #if parameter values are 0, namevec doesn't identify them as parameters
   if ((dim(parse.mat)[1]) != (length(namesvec)))  {
     parse.mat <- parse.mat[parse.mat[,1] != 0,]
     if ((dim(parse.mat)[1]) == (length(namesvec))) rownames(parse.mat) <- namesvec 
   } else {
     rownames(parse.mat) <- namesvec
   }
-  #end FIXME!!!
-
+ 
   #------------------- end se, rse, cse, gradient --------------------------
 
   #----------------- covariance and information matrices -------------------

@@ -1,8 +1,8 @@
 Package: REQS
 Type: Package
 Title: R/EQS Interface
-Version: 0.8-9
-Date: 2011-01-22
+Version: 0.8-10
+Date: 2011-03-27
 Author: Patrick Mair, Eric Wu
 Maintainer: Eric Wu <ericwu@mvsoft.com>
 Description: This package contains the function run.eqs() which calls
@@ -16,5 +16,5 @@ URL: http://www.mvsoft.com
 LazyLoad: yes
 Depends: gtools
 Repository: CRAN
-Date/Publication: 2011-01-23 09:21:40
-Packaged: 2011-01-22 09:16:42 UTC; mair
+Date/Publication: 2011-03-27 16:02:07
+Packaged: 2011-03-27 12:45:22 UTC; mair
