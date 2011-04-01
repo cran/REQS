@@ -151,7 +151,7 @@ read.eqs <- function(file)
   parlist <- split(parvec, cutfac)                                #vector splitting
   parmat <- mapply(function(xx, dd) {                             #list of phi, gamma, beta matrices
                     matrix(xx, nrow = dd[1], ncol = dd[2], byrow = TRUE)
-                   }, parlist, dimlist)
+                   }, parlist, dimlist, SIMPLIFY = FALSE)
   names(parmat) <- c("Phi", "Gamma", "Beta")
   colnames(parmat$Phi) <- rownames(parmat$Phi) <- colnames(parmat$Gamma) <- varnames.vec[1:n.ind]
   rownames(parmat$Gamma) <- rownames(parmat$Beta) <- colnames(parmat$Beta) <- varnames.vec[(n.ind+1):length(varnames.vec)]        
@@ -170,10 +170,8 @@ read.eqs <- function(file)
       combmat <- combinations(dim(parmat[[i]])[1], 2, repeats.allowed = TRUE)      #index matrix for name combinations
       comb.names <- apply(combmat, 2, function(rn) rownames(parmat[[i]])[rn])      #matrix with name combinations
       
-      ## to be tested
-      comb.names[,2:1] <- comb.names
-      
-      ## to be tested!!
+      comb.names[,2:1] <- comb.names                                               #switch parameter order
+     
       if (sum(diag(parmat[[i]]) == 0) > 0) {                                       #parameter with value 0 to be included
        diag(parmat[[i]])[which(diag(parmat[[i]]) == 0)] <- -99                     #set dummy
       }
@@ -181,9 +179,8 @@ read.eqs <- function(file)
       par.val0 <- parmat[[i]][lower.tri(parmat[[i]], diag = TRUE)]                 #parameter vector with 0's
     } else {                                                                       #gamma not symmetric
       comb.names <- as.matrix(expand.grid(rownames(parmat[[i]]), colnames(parmat[[i]])))
-      
-      ## to be tested!!
-      if (i ==3) comb.names[,2:1] <- comb.names
+    
+      if (i ==3) comb.names[,2:1] <- comb.names                                    #switch parameter order
       
       par.val0 <- as.vector(parmat[[i]])  
     }
@@ -193,6 +190,8 @@ read.eqs <- function(file)
     namesvec <- c(namesvec, names)
   }
   
+  if (!is.matrix(parse.mat)) parse.mat <- rbind(parse.mat)              #if only 1 or less parameters estimated
+  if (length(namesvec) == 0) namesvec <- NA
   if ((dim(parse.mat)[1]) != (length(namesvec)))  {
     parse.mat <- parse.mat[parse.mat[,1] != 0,]
     if ((dim(parse.mat)[1]) == (length(namesvec))) rownames(parse.mat) <- namesvec 
