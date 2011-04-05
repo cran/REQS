@@ -35,6 +35,17 @@ read.eqs <- function(file)
   #cbk.base <- read.fwf(file.cbk, widths = c(13, 3), skip = 6, col.names = c("variable", "line"), buffersize = 1, n = 98)        #data frame 
   cbk.base <- read.fwf(file.cbk, widths = c(13, 3), skip = 6, col.names = c("variable", "line"), buffersize = 1, n = 103)        #data frame 
 
+  #--------------- AGLS ---------------
+  etsout <- NULL
+  etslines <- readLines(file.ets)
+  model.title <- etslines[1]
+  if (length(etslines) > 16) {                                             #FIXME: for multiple group
+    if (length(grep("LS ", model.title)) > 0) {
+       etsout <- etslines[-(1:16)]                                         #eliminate LS output
+       writeLines(text = etsout, con = file.ets)
+    }
+  }
+  rm(etslines)
 
   #--------------- model info  ----------------------
   nminfo <- length(which(cbk.base[,2] == 2))                              #how many lines with model infos
