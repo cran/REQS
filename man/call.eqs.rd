@@ -39,9 +39,11 @@ Returns \code{TRUE} is the estimation was succesfully and \code{FALSE} otherwise
 
 \examples{
 
+\dontrun{
 ##not executable, valid serial number has to be provided
-##res <- call.eqs(EQSpgm = "C:/Program Files/EQS61/WINEQS.EXE", EQSmodel = "c:/eqs61/examples/manul7.eqs", serial = "1234")
-
+res <- call.eqs(EQSpgm = "C:/Program Files/EQS61/WINEQS.EXE", 
+                EQSmodel = "c:/eqs61/examples/manul7.eqs", serial = "1234")
+}
 
 }
 

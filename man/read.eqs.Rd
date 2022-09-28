@@ -44,8 +44,10 @@ read.eqs(file)
 
 \examples{
 
+\dontrun{
 ##not executable
-##eqsout <- read.eqs("c:/home/user/eqs/eqsfile.ets")
+eqsout <- read.eqs("c:/home/user/eqs/eqsfile.ets")
+}
 
 }
 

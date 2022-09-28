@@ -1,8 +1,8 @@
-09978baa006bcef85aa60e431e8ef84f *DESCRIPTION
-1a710f4743ecd832552bc0479b510ba4 *NAMESPACE
+33a5977721b46fcb2d27739fd0f6371c *DESCRIPTION
+5812d7d993dcff84929a462bb0d57324 *NAMESPACE
 91bdf4214027af2b9bd6039520e09d8f *R/call.eqs.R
 86f7c9d0d57e9dfd46cd9800c1ce63b1 *R/read.eqs.R
 dae9f83a76bde0b97cc6a6e22adf5844 *R/run.eqs.r
-79220d6028e43c5ee86d90e372abec80 *man/call.eqs.rd
-5374c348233a33f05362eee6e559acfa *man/read.eqs.Rd
-e44b39cbdd267e4871afb731296e50b3 *man/run.eqs.rd
+4ed385c077277c6022b3d5ad84c816eb *man/call.eqs.rd
+96204972dddb70c4277d955dee61fd81 *man/read.eqs.Rd
+336715bb4cedf1c70b1daf73ebdb5eaa *man/run.eqs.rd
